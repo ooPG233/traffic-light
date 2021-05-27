@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #trafficLight {
+            height: 200px;
+            width:600px;
+            display: flex;
+            border:2px solid black;
+            border-radius: 50px;
+            padding: 5px;
+        }
+
+        .light {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background-color: #fff;
+            opacity: 0.3;
+        }
+
+        .isLighted {
+            opacity: 1;
+        }
+
+        .isTwink {
+            animation: twink 1s;
+            animation-iteration-count: infinite;
+        }
+
+
+        @keyframes twink {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0.3;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="trafficLight">
+    </div>
+</body>
+<script>
+    class Light {
+        constructor(color, duration, twinkleDuration) {
+            this.color = color
+            this.duration = duration * 1000
+            this.twinkleDuration = twinkleDuration * 1000
+        }
+    }
+
+    const trafficLightConfig = [
+        ['red', 20, 5],
+        ['green', 20, 5],
+        ['yellow', 10, 0]
+    ] //控制器配置选项
+
+    let trafficLightList = trafficLightConfig.map(item => {//通过配置选项生成灯实例
+        return new Light(...item)
+    })
+
+    const trafficLight = document.getElementById('trafficLight')
+    for (let i = 0; i < trafficLightList.length; i++) { //生成灯的DOM节点
+        let light = document.createElement('div')
+        light.classList.add('light')
+        light.style.backgroundColor = trafficLightList[i].color
+        trafficLight.appendChild(light)
+        trafficLightList[i].mounter = light
+    }
+
+    function bright(obj) {//控制灯亮
+        obj.mounter.classList.add('isLighted')
+        return new Promise(resolve => {
+            setTimeout(() => {
+                obj.mounter.classList.remove('isLighted')
+                resolve()
+            }, obj.duration - obj.twinkleDuration)
+        })
+    }
+
+    function twink(obj) {//控制灯闪烁
+        obj.mounter.classList.add('isTwink')
+        return new Promise(resolve => {
+            setTimeout(() => {
+                obj.mounter.classList.remove('isTwink')
+                resolve()
+            }, obj.twinkleDuration)
+        })
+    }
+
+    async function lightControl(list) {//灯光控制器
+        while (true) {
+            for (let item of list) {
+                await bright(item)
+                await twink(item)
+            }
+        }
+    }
+
+    lightControl(trafficLightList)
+
+
+    // console.log(trafficLightList);
+</script>
+
+</html>
